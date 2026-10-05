@@ -34,3 +34,21 @@ def init_admin_table():
 # Run it as soon as db.py is imported anywhere in the project,
 # so the table always exists before login.py or auth.py needs it.
 init_admin_table()
+
+def init_medicine_fields():
+    """Add optional medicine details without changing existing records."""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SHOW COLUMNS FROM medicines")
+        columns = {row[0] for row in cursor.fetchall()}
+        for field in ("generic", "strength"):
+            if field not in columns:
+                cursor.execute(
+                    f"ALTER TABLE medicines ADD COLUMN `{field}` VARCHAR(100) NULL DEFAULT NULL"
+                )
+        conn.commit()
+    finally:
+        cursor.close()
+
+
+init_medicine_fields()

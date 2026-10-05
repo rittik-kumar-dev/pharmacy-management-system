@@ -1,6 +1,6 @@
-# Pharmacy Management System
+# Medicine Shop Management System
 
-A desktop pharmacy management system built with:
+A desktop medicine shop management system built with:
 
 - Python
 - MySQL

@@ -1,4 +1,4 @@
-# pharmacy-system/dashboard.py
+# Medicine Shop Management System - dashboard.py
 import tkinter as tk
 from tkinter import messagebox
 from datetime import date, timedelta
@@ -44,7 +44,7 @@ class DashboardFrame(tk.Frame):
 
         tk.Label(header, text="💊", bg=BG, fg=ACCENT,
                  font=("Segoe UI", 22)).pack(side="left", padx=(4, 10))
-        tk.Label(header, text="Pharmacy Management", bg=BG, fg=TEXT,
+        tk.Label(header, text="Medicine Shop Management System", bg=BG, fg=TEXT,
                  font=FONT_HEAD).pack(side="left")
 
         right = tk.Frame(header, bg=BG)

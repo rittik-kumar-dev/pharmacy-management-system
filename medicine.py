@@ -1,14 +1,14 @@
 from db import conn
 
-def add_medicine(name,price ,stock,expires_date):
+def add_medicine(name,price ,stock,expires_date,generic=None,strength=None):
     cursor=conn.cursor() # cursor is truck which carry query, conn is bridge to mysql
     query="""
-    INSERT INTO medicines(name,price,stock,expires_date)
-    VALUES(%s,%s,%s,%s)   
+    INSERT INTO medicines(name,price,stock,expires_date,generic,strength)
+    VALUES(%s,%s,%s,%s,%s,%s)   
     """
     #%s means placeholders, which is empty
     # Using placeholders prevents SQL Injection means security risk
-    values=(name,price,stock,expires_date)
+    values=(name,price,stock,expires_date,generic or None,strength or None)
     
     cursor.execute(query,values)  # curson run it on mysql server and take data into it(cursor)
     conn.commit() # save data in mysql
@@ -32,14 +32,14 @@ def get_medicine_by_id(one_id):
     
     
     
-def update_medicine(one_id,name,price,stock,expires_date):
+def update_medicine(one_id,name,price,stock,expires_date,generic=None,strength=None):
          cursor=conn.cursor(dictionary=True)
          query="""
          UPDATE medicines 
-         SET name=%s,price=%s,stock=%s,expires_date=%s
+         SET name=%s,price=%s,stock=%s,expires_date=%s,generic=%s,strength=%s
          WHERE id=%s
          """
-         values=(name,price,stock,expires_date,one_id)
+         values=(name,price,stock,expires_date,generic or None,strength or None,one_id)
          cursor.execute(query,values)
          conn.commit()
          print(f"update {one_id} successfully")

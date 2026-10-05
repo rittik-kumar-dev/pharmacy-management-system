@@ -1,4 +1,4 @@
-# pharmacy-system/app.py
+# Medicine Shop Management System - app.py
 # This is now the ONLY entry point. Run this file.
 #
 # Architecture: ONE tk.Tk() root window stays alive for the whole
@@ -16,7 +16,7 @@ BG = "#0F1117"
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Pharmacy Management System")
+        self.title("Medicine Shop Management System")
         self.geometry("1100x680+120+60")
         self.minsize(900, 580)
         self.configure(bg=BG)

@@ -1,4 +1,4 @@
-# pharmacy-system/login.py
+# Medicine Shop Management System - login.py
 import tkinter as tk
 from tkinter import messagebox
 from auth import admin_exists, create_admin, verify_admin
@@ -71,7 +71,7 @@ class LoginFrame(tk.Frame):
 
     def _build_login_view(self):
         self._clear_card()
-        self._header("Admin Login", "Sign in to manage the pharmacy")
+        self._header("Admin Login", "Sign in to manage the medicine shop")
 
         form = tk.Frame(self._card, bg=PANEL)
         form.pack(fill="x", padx=30)
