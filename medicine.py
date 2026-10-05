@@ -4,9 +4,10 @@ def add_medicine(name,price ,stock,expires_date):
     cursor=conn.cursor() # cursor is truck which carry query, conn is bridge to mysql
     query="""
     INSERT INTO medicines(name,price,stock,expires_date)
-    VALUES(%s,%s,%s,%s)   #%s means placeholders, which is empty 
-                          # Using placeholders prevents SQL Injection means security risk
+    VALUES(%s,%s,%s,%s)   
     """
+    #%s means placeholders, which is empty
+    # Using placeholders prevents SQL Injection means security risk
     values=(name,price,stock,expires_date)
     
     cursor.execute(query,values)  # curson run it on mysql server and take data into it(cursor)
