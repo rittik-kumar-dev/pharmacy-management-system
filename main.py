@@ -69,6 +69,7 @@ class MedicineFrame(tk.Frame):
         self.controller = controller
         self._selected_id = None
         self._all_data = []
+        self._status_after_id = None
         self._build_ui()
 
     def on_show(self):
@@ -76,26 +77,8 @@ class MedicineFrame(tk.Frame):
 
     # ── Layout skeleton ──────────────────────────────────────────
     def _build_ui(self):
-        header = tk.Frame(self, bg=PANEL)
-        header.pack(fill="x", side="top")
-
-        left_col = tk.Frame(header, bg=PANEL)
-        left_col.pack(side="left", padx=20, pady=10, anchor="w")
-
-        title_row = tk.Frame(left_col, bg=PANEL)
-        title_row.pack(anchor="w")
-        tk.Label(title_row, text="💊", bg=PANEL, fg=ACCENT,
-                 font=("Segoe UI", 20)).pack(side="left", padx=(0, 6))
-        tk.Label(title_row, text="Medicine Shop Management System", bg=PANEL, fg=TEXT,
-                 font=FONT_HEAD).pack(side="left")
-
-        back_link = tk.Label(left_col, text="← Dashboard", bg=PANEL, fg=ACCENT,
-                              font=FONT_SUB, cursor="hand2")
-        back_link.pack(anchor="w", pady=(2, 0))
-        back_link.bind("<Button-1>", lambda _e: self.controller.show_frame("DashboardFrame"))
-
-        tk.Label(header, text="Medicine Inventory", bg=PANEL, fg=MUTED,
-                 font=FONT_SUB).pack(side="right", padx=24, pady=12)
+        tk.Label(self, text="Medicine Inventory", bg=BG, fg=TEXT,
+                 font=("Segoe UI", 16, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
 
         body = tk.Frame(self, bg=BG)
         body.pack(fill="both", expand=True)
@@ -105,7 +88,7 @@ class MedicineFrame(tk.Frame):
 
     # ── Sidebar (form) ───────────────────────────────────────────
     def _build_sidebar(self, parent):
-        sidebar = tk.Frame(parent, bg=PANEL, width=300)
+        sidebar = tk.Frame(parent, bg=PANEL, width=280)
         sidebar.pack(side="left", fill="y", padx=(12, 6), pady=12)
         sidebar.pack_propagate(False)
 
@@ -418,6 +401,9 @@ class MedicineFrame(tk.Frame):
         self._set_status("")
 
     def _set_status(self, msg):
+        if self._status_after_id is not None:
+            self.after_cancel(self._status_after_id)
+            self._status_after_id = None
         self._status.config(text=msg)
         if msg:
-            self.after(4000, lambda: self._status.config(text=""))
+            self._status_after_id = self.after(4000, lambda: self._set_status(""))

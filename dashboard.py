@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from datetime import date, timedelta
 from medicine import get_all_medicines
+from main import format_name
 
 BG        = "#0F1117"
 PANEL     = "#1A1D27"
@@ -30,63 +31,14 @@ class DashboardFrame(tk.Frame):
         super().__init__(parent, bg=BG)
         self.controller = controller
 
-        self._build_header()
         self._build_body()
 
     def on_show(self):
-        self._username_lbl.config(
-            text=f"Logged in as: {self.controller.admin_username or 'Admin'}")
         self._load_stats()
-
-    def _build_header(self):
-        header = tk.Frame(self, bg=BG, height=70)
-        header.pack(fill="x", padx=20, pady=(16, 4))
-
-        tk.Label(header, text="💊", bg=BG, fg=ACCENT,
-                 font=("Segoe UI", 22)).pack(side="left", padx=(4, 10))
-        tk.Label(header, text="Medicine Shop Management System", bg=BG, fg=TEXT,
-                 font=FONT_HEAD).pack(side="left")
-
-        right = tk.Frame(header, bg=BG)
-        right.pack(side="right")
-        self._username_lbl = tk.Label(right, text="Logged in as: Admin",
-                                       bg=BG, fg=MUTED, font=FONT_SMALL)
-        self._username_lbl.pack(anchor="e")
-
-        logout_link = tk.Label(right, text="Logout", bg=BG, fg=DANGER,
-                                font=FONT_SMALL, cursor="hand2")
-        logout_link.pack(anchor="e", pady=(4, 0))
-        logout_link.bind("<Button-1>", lambda _e: self.controller.logout())
 
     def _build_body(self):
         body = tk.Frame(self, bg=BG)
-        body.pack(fill="both", expand=True, padx=20, pady=(8, 20))
-
-        sidebar = tk.Frame(body, bg=PANEL, width=200)
-        sidebar.pack(side="left", fill="y", padx=(0, 16))
-        sidebar.pack_propagate(False)
-
-        nav_items = [
-            ("Dashboard", True,  None),
-            ("Medicines", True,  self._open_medicines),
-            ("Sales",     False, None),
-            ("Suppliers", False, None),
-            ("Reports",   False, None),
-        ]
-
-        for label, enabled, command in nav_items:
-            fg = TEXT if enabled else MUTED
-            font = FONT_NAV_B if label == "Dashboard" else FONT_NAV
-            btn = tk.Label(sidebar, text=label, bg=PANEL, fg=fg, font=font,
-                           anchor="w", padx=20, pady=12,
-                           cursor="hand2" if enabled else "arrow")
-            btn.pack(fill="x")
-            if enabled and command:
-                btn.bind("<Button-1>", lambda _e, c=command: c())
-            elif not enabled:
-                btn.bind("<Button-1>",
-                         lambda _e, l=label: messagebox.showinfo(
-                             l, f"{l} module is coming soon."))
+        body.pack(fill="both", expand=True, padx=4, pady=(8, 0))
 
         self._content = tk.Frame(body, bg=BG)
         self._content.pack(side="left", fill="both", expand=True)
@@ -146,7 +98,7 @@ class DashboardFrame(tk.Frame):
                 row_bg = ROW_ODD if i % 2 else PANEL
                 row = tk.Frame(self._recent_frame, bg=row_bg)
                 row.pack(fill="x")
-                tk.Label(row, text=m["name"], bg=row_bg, fg=TEXT,
+                tk.Label(row, text=format_name(m["name"]), bg=row_bg, fg=TEXT,
                          font=FONT_NAV, anchor="w", width=25, padx=16, pady=8
                          ).pack(side="left")
                 tk.Label(row, text=f"Stock: {m['stock']}", bg=row_bg, fg=MUTED,

@@ -19,16 +19,22 @@ def add_medicine(name,price ,stock,expires_date,generic=None,strength=None):
     
 def get_all_medicines():
     cursor=conn.cursor(dictionary=True) # it take data as dictionary format
-    cursor.execute("SELECT * FROM medicines")
-    return cursor.fetchall() #fetch data from cursor
+    try:
+        cursor.execute("SELECT * FROM medicines")
+        return cursor.fetchall() #fetch data from cursor
+    finally:
+        cursor.close()
     
    
    
 def get_medicine_by_id(one_id):
     cursor=conn.cursor(dictionary=True)
     query="SELECT * FROM medicines WHERE id=%s "
-    cursor.execute(query, (one_id,)) # one_id has to be sent as a Tuple(,)|and use a , for single one value 
-    return cursor.fetchone()
+    try:
+        cursor.execute(query, (one_id,)) # one_id has to be sent as a Tuple(,)|and use a , for single one value
+        return cursor.fetchone()
+    finally:
+        cursor.close()
     
     
     
