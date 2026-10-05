@@ -49,16 +49,18 @@ def styled_button(parent, text, command, color=ACCENT, fg=BG, width=14):
     return btn
 
 
-def labeled_entry(parent, label_text, row, show=None):
+def labeled_entry(parent, label_text, row, show=None, compact=False):
+    row_padding = (4, 1) if compact else (8, 2)
     tk.Label(parent, text=label_text, bg=PANEL, fg=TEXT,
-             font=FONT_LABEL).grid(row=row, column=0, sticky="w", pady=(8, 2))
+             font=FONT_LABEL).grid(row=row, column=0, sticky="w", pady=row_padding)
     var = tk.StringVar()
     e = tk.Entry(parent, textvariable=var, font=FONT_INPUT,
                  bg="#262A38", fg=TEXT, insertbackground=ACCENT, width=1,
                  relief="flat", bd=0, highlightthickness=1,
                  highlightbackground=BORDER, highlightcolor=ACCENT,
                  show=show if show else "")
-    e.grid(row=row, column=1, sticky="ew", pady=(8, 2), padx=(12, 0), ipady=6)
+    e.grid(row=row, column=1, sticky="ew", pady=row_padding, padx=(12, 0),
+           ipady=3 if compact else 6)
     return var
 
 
@@ -89,59 +91,61 @@ class MedicineFrame(tk.Frame):
     # ── Sidebar (form) ───────────────────────────────────────────
     def _build_sidebar(self, parent):
         sidebar = tk.Frame(parent, bg=PANEL, width=280)
-        sidebar.pack(side="left", fill="y", padx=(12, 6), pady=12)
+        sidebar.pack(side="left", fill="y", padx=(12, 6), pady=8)
         sidebar.pack_propagate(False)
 
         title_row = tk.Frame(sidebar, bg=PANEL)
-        title_row.pack(fill="x", padx=18, pady=(18, 4))
+        title_row.pack(fill="x", padx=18, pady=(8, 2))
         self._form_title = tk.Label(title_row, text="Medicine Details",
                                     bg=PANEL, fg=ACCENT, font=("Segoe UI", 13, "bold"))
         self._form_title.pack(side="left")
         self._selected_label = tk.Label(sidebar, text="", bg=PANEL, fg=MUTED, font=FONT_SMALL)
-        self._selected_label.pack(fill="x", padx=18, pady=(0, 4))
+        self._selected_label.pack(fill="x", padx=18, pady=(0, 2))
 
-        tk.Frame(sidebar, bg=BORDER, height=1).pack(fill="x", padx=18, pady=(0, 8))
+        tk.Frame(sidebar, bg=BORDER, height=1).pack(fill="x", padx=18, pady=(0, 4))
 
         form = tk.Frame(sidebar, bg=PANEL)
         form.pack(fill="x", padx=18)
         form.columnconfigure(1, weight=1)
 
-        self._var_name    = labeled_entry(form, "Medicine Name",   0)
-        self._var_generic = labeled_entry(form, "Group/Generic", 1)
-        self._var_strength = labeled_entry(form, "Strength", 2)
-        self._var_price   = labeled_entry(form, "Price (৳)",        3)
-        self._var_stock   = labeled_entry(form, "Stock Quantity",   4)
-        self._var_expires = labeled_entry(form, "Expiry Date",      5)
+        self._var_name    = labeled_entry(form, "Medicine Name",   0, compact=True)
+        self._var_generic = labeled_entry(form, "Group/Generic", 1, compact=True)
+        self._var_strength = labeled_entry(form, "Strength", 2, compact=True)
+        self._var_price   = labeled_entry(form, "Price (৳)",        3, compact=True)
+        self._var_stock   = labeled_entry(form, "Stock Quantity",   4, compact=True)
+        self._var_expires = labeled_entry(form, "Expiry Date",      5, compact=True)
 
         tk.Label(form, text="Format: YYYY-MM-DD", bg=PANEL, fg=MUTED,
                  font=FONT_SMALL).grid(row=6, column=1, sticky="w", padx=(12, 0))
 
         btn_frame = tk.Frame(sidebar, bg=PANEL)
-        btn_frame.pack(fill="x", padx=18, pady=(18, 0))
+        btn_frame.pack(fill="x", padx=18, pady=(8, 0))
 
         self._btn_save = styled_button(btn_frame, "➕  Add", self._on_save, width=12)
-        self._btn_save.pack(fill="x", pady=(0, 6))
+        self._btn_save.pack(fill="x", pady=(0, 3))
 
         self._btn_update = styled_button(btn_frame, "✏️  Update", self._on_update,
                                          color="#3B82F6", fg=TEXT, width=12)
-        self._btn_update.pack(fill="x", pady=(0, 6))
+        self._btn_update.pack(fill="x", pady=(0, 3))
         self._btn_update.config(state="disabled")
 
         self._btn_delete = styled_button(btn_frame, "🗑  Delete", self._on_delete,
                                          color=DANGER, fg=TEXT, width=12)
-        self._btn_delete.pack(fill="x", pady=(0, 6))
+        self._btn_delete.pack(fill="x", pady=(0, 3))
         self._btn_delete.config(state="disabled")
 
         self._btn_clear = styled_button(btn_frame, "✖  Clear", self._clear_form,
                                         color=BORDER, fg=MUTED, width=12)
         self._btn_clear.pack(fill="x")
+        for button in (self._btn_save, self._btn_update, self._btn_delete, self._btn_clear):
+            button.config(pady=3)
 
         self._status = tk.Label(sidebar, text="", bg=PANEL, fg=ACCENT,
                                 font=FONT_SMALL, wraplength=260, justify="left")
-        self._status.pack(fill="x", padx=18, pady=(12, 0))
+        self._status.pack(fill="x", padx=18, pady=(4, 0))
 
         self._stats_frame = tk.Frame(sidebar, bg=BG, bd=0)
-        self._stats_frame.pack(fill="x", padx=18, pady=(16, 18), side="bottom")
+        self._stats_frame.pack(fill="x", padx=18, pady=(4, 6), side="bottom")
         self._lbl_total   = self._stat_label("Total medicines", "—")
         self._lbl_low     = self._stat_label("Low stock (< 10)", "—")
 

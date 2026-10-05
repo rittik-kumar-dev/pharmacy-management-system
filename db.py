@@ -52,3 +52,25 @@ def init_medicine_fields():
 
 
 init_medicine_fields()
+
+
+def init_suppliers_table():
+    """Create suppliers without replacing any existing table or records."""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS suppliers (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                contact_person VARCHAR(100),
+                phone VARCHAR(20) NOT NULL,
+                email VARCHAR(100),
+                address VARCHAR(255)
+            )
+        """)
+        conn.commit()
+    finally:
+        cursor.close()
+
+
+init_suppliers_table()
