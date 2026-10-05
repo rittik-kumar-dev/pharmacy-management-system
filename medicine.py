@@ -1,4 +1,5 @@
 from db import conn
+from mysql.connector import IntegrityError
 
 def add_medicine(name,price ,stock,expires_date,generic=None,strength=None):
     cursor=conn.cursor() # cursor is truck which carry query, conn is bridge to mysql
@@ -21,7 +22,9 @@ def get_all_medicines():
     cursor=conn.cursor(dictionary=True) # it take data as dictionary format
     try:
         cursor.execute("SELECT * FROM medicines")
-        return cursor.fetchall() #fetch data from cursor
+        rows = cursor.fetchall()
+        conn.commit()
+        return rows
     finally:
         cursor.close()
     
@@ -32,7 +35,9 @@ def get_medicine_by_id(one_id):
     query="SELECT * FROM medicines WHERE id=%s "
     try:
         cursor.execute(query, (one_id,)) # one_id has to be sent as a Tuple(,)|and use a , for single one value
-        return cursor.fetchone()
+        row = cursor.fetchone()
+        conn.commit()
+        return row
     finally:
         cursor.close()
     
@@ -51,21 +56,18 @@ def update_medicine(one_id,name,price,stock,expires_date,generic=None,strength=N
          print(f"update {one_id} successfully")
          cursor.close()
          
-def delete_medicine(one_id)   :
-    cursor=conn.cursor(dictionary=True)
-    query="""
-    DELETE FROM medicines WHERE id=%s
-    """
-    cursor.execute(query,(one_id,))
-    conn.commit()
-    cursor.close()
-    
-          
-         
-         
-          
-        
-       
-         
-          
-    
+def delete_medicine(one_id):
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM medicines WHERE id=%s", (one_id,))
+        conn.commit()
+    except IntegrityError as error:
+        conn.rollback()
+        if error.errno == 1451:
+            raise ValueError("This medicine is referenced by sales history and cannot be deleted.") from error
+        raise
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
