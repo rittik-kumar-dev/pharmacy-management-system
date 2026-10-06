@@ -48,7 +48,7 @@ class App(tk.Tk):
         sidebar.pack_propagate(False)
         self._nav_buttons = {}
         for label, page in (("Dashboard", "DashboardFrame"), ("Medicines", "MedicineFrame"),
-                            ("Sales", "SalesFrame"), ("Suppliers", "SupplierFrame"), ("Reports", None)):
+                            ("Sales", "SalesFrame"), ("Suppliers", "SupplierFrame"), ("Reports", "ReportsFrame")):
             button = tk.Button(sidebar, text=label, anchor="w", padx=16, pady=12,
                                bg=PANEL, fg=TEXT if page else MUTED, relief="flat", bd=0,
                                font=("Segoe UI", 11), activebackground="#26333A",
@@ -69,8 +69,9 @@ class App(tk.Tk):
         from main import MedicineFrame
         from suppliers import SupplierFrame
         from sales import SalesFrame
+        from reports import ReportsFrame
 
-        for screen in (LoginFrame, DashboardFrame, MedicineFrame, SupplierFrame, SalesFrame):
+        for screen in (LoginFrame, DashboardFrame, MedicineFrame, SupplierFrame, SalesFrame, ReportsFrame):
             parent = self.container if screen is LoginFrame else self.content
             frame = screen(parent=parent, controller=self)
             self.frames[screen.__name__] = frame
