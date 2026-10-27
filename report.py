@@ -75,7 +75,7 @@ def get_sale_details(sale_id):
 
 
 def get_inventory_report():
-    return _read("""SELECT id, name, generic, strength, stock, price, expires_date
+    return _read("""SELECT id, name, generic, strength, stock, price, expires_date, rack_number
                     FROM medicines ORDER BY name, id""")
 
 

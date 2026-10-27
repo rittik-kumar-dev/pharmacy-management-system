@@ -1,15 +1,27 @@
+import re
 from db import conn
 from mysql.connector import IntegrityError
 
-def add_medicine(name,price ,stock,expires_date,generic=None,strength=None):
+def validate_rack_number(value):
+    text = str(value).strip()
+    if not re.fullmatch(r"[0-9]+", text):
+        raise ValueError("Rack number must be a positive whole number.")
+    text = text.lstrip("0") or "0"
+    if len(text) > 10 or not 1 <= int(text) <= 2147483647:
+        raise ValueError("Rack number must be between 1 and 2147483647.")
+    return int(text)
+
+
+def add_medicine(name,price ,stock,expires_date,generic=None,strength=None,rack_number=None):
+    rack_number = validate_rack_number(rack_number)
     cursor=conn.cursor() # cursor is truck which carry query, conn is bridge to mysql
     query="""
-    INSERT INTO medicines(name,price,stock,expires_date,generic,strength)
-    VALUES(%s,%s,%s,%s,%s,%s)   
+    INSERT INTO medicines(name,price,stock,expires_date,generic,strength,rack_number)
+    VALUES(%s,%s,%s,%s,%s,%s,%s)
     """
     #%s means placeholders, which is empty
     # Using placeholders prevents SQL Injection means security risk
-    values=(name,price,stock,expires_date,generic or None,strength or None)
+    values=(name,price,stock,expires_date,generic or None,strength or None,rack_number)
     
     cursor.execute(query,values)  # curson run it on mysql server and take data into it(cursor)
     conn.commit() # save data in mysql
@@ -43,14 +55,15 @@ def get_medicine_by_id(one_id):
     
     
     
-def update_medicine(one_id,name,price,stock,expires_date,generic=None,strength=None):
+def update_medicine(one_id,name,price,stock,expires_date,generic=None,strength=None,rack_number=None):
+         rack_number = validate_rack_number(rack_number)
          cursor=conn.cursor(dictionary=True)
          query="""
          UPDATE medicines 
-         SET name=%s,price=%s,stock=%s,expires_date=%s,generic=%s,strength=%s
+         SET name=%s,price=%s,stock=%s,expires_date=%s,generic=%s,strength=%s,rack_number=%s
          WHERE id=%s
          """
-         values=(name,price,stock,expires_date,generic or None,strength or None,one_id)
+         values=(name,price,stock,expires_date,generic or None,strength or None,rack_number,one_id)
          cursor.execute(query,values)
          conn.commit()
          print(f"update {one_id} successfully")

@@ -49,8 +49,8 @@ class SalesFrame(tk.Frame):
                  highlightthickness=1, highlightbackground=BORDER,
                  highlightcolor=ACCENT).pack(side="left", fill="x", expand=True, ipady=4)
         self._medicine_tree = self._make_table(body, 1,
-            ("Medicine Name", "Generic", "Strength", "Available Stock", "Unit Price", "Expiry Date"),
-            (160, 145, 100, 110, 90, 105))
+            ("Medicine Name", "Generic", "Strength", "Available Stock", "Unit Price", "Expiry Date", "Rack No."),
+            (160, 145, 100, 110, 90, 105, 90))
         self._medicine_tree.tag_configure("unavailable", foreground=DANGER)
         self._medicine_tree.bind("<<TreeviewSelect>>", self._on_select)
         selection = tk.Frame(body, bg=PANEL)
@@ -126,7 +126,7 @@ class SalesFrame(tk.Frame):
             if medicine["stock"] <= 0 or expiry is None or expiry < today:
                 tags += ("unavailable",)
             self._medicine_tree.insert("", "end", iid=str(medicine["id"]),
-                values=values+(medicine["stock"], f"{medicine['price']:.2f}", expiry or ""), tags=tags)
+                values=values+(medicine["stock"], f"{medicine['price']:.2f}", expiry or "", medicine.get("rack_number") or "Not assigned"), tags=tags)
 
     def _on_select(self, _event):
         selected = self._medicine_tree.selection()
@@ -136,7 +136,8 @@ class SalesFrame(tk.Frame):
             self._show_selection(medicine)
 
     def _show_selection(self, medicine):
-        self._selected_label.config(text=f"{format_name(medicine['name'])} | {format_name(medicine.get('generic'))} | {format_strength(medicine.get('strength'))}\nStock: {medicine['stock']} | Unit price: \u09f3{medicine['price']:.2f}")
+        rack = medicine.get("rack_number") or "Not assigned"
+        self._selected_label.config(text=f"{format_name(medicine['name'])} | {format_name(medicine.get('generic'))} | {format_strength(medicine.get('strength'))}\nStock: {medicine['stock']} | Unit price: \u09f3{medicine['price']:.2f} | Rack No.: {rack}")
         self._btn_add.config(state="normal")
 
     def _reset_selection(self):

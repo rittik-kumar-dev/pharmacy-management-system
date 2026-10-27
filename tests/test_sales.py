@@ -12,7 +12,7 @@ class SalesTests(unittest.TestCase):
     def setUpClass(cls):
         cls.snapshots = {}
         cursor = conn.cursor()
-        for table in ('admins', 'medicines', 'suppliers', 'madicines', 'sales', 'sale_items'):
+        for table in ('admins', 'medicines', 'suppliers', 'sales', 'sale_items'):
             cursor.execute(f'SELECT * FROM `{table}` ORDER BY id')
             cls.snapshots[table] = cursor.fetchall()
         conn.commit()

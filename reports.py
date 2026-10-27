@@ -94,7 +94,7 @@ class ReportsFrame(tk.Frame):
             self._details_button.pack(side="left")
         columns = {
             "Sales": ("Sale ID", "Date/Time", "Sold By", "Total Amount"),
-            "Inventory": ("Medicine Name", "Group / Generic", "Strength", "Stock Quantity", "Price", "Expiry Date"),
+            "Inventory": ("Medicine Name", "Group / Generic", "Strength", "Stock Quantity", "Price", "Expiry Date", "Rack No."),
             "Low Stock / Expiry": ("Medicine Name", "Strength", "Stock", "Expiry Date", "Status"),
         }
         self._configure_columns(self._tree, columns[self._mode])
@@ -147,7 +147,7 @@ class ReportsFrame(tk.Frame):
                     name, strength = format_name(r["name"]), format_strength(r["strength"])
                     if self._mode == "Inventory":
                         values.append((name, format_name(r["generic"]), strength, r["stock"],
-                                       f"\u09f3{r['price']:.2f}", r["expires_date"] or ""))
+                                       f"\u09f3{r['price']:.2f}", r["expires_date"] or "", r.get("rack_number") or "Not assigned"))
                     else:
                         values.append((name, strength, r["stock"], r["expires_date"] or "", r["status"]))
                 summary = f"{len(rows)} medicines shown"

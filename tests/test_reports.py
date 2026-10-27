@@ -168,7 +168,7 @@ class ReportsTests(unittest.TestCase):
         frame._switch_tab('Inventory')
         self.assertEqual(len(frame._tree.get_children()),5)
         self.assertEqual(tuple(frame._tree['columns']),
-                         ('Medicine Name', 'Group / Generic', 'Strength', 'Stock Quantity', 'Price', 'Expiry Date'))
+                         ('Medicine Name', 'Group / Generic', 'Strength', 'Stock Quantity', 'Price', 'Expiry Date', 'Rack No.'))
         self.assertEqual(set(frame._tree.get_children()), {'1', '2', '3', '4', '5'})
         frame._switch_tab('Low Stock / Expiry')
         self.assertEqual(len(frame._tree.get_children()),4)

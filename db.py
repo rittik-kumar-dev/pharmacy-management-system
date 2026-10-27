@@ -41,10 +41,11 @@ def init_medicine_fields():
     try:
         cursor.execute("SHOW COLUMNS FROM medicines")
         columns = {row[0] for row in cursor.fetchall()}
-        for field in ("generic", "strength"):
+        for field, sql_type in (("generic", "VARCHAR(100)"), ("strength", "VARCHAR(100)"),
+                                ("rack_number", "INT")):
             if field not in columns:
                 cursor.execute(
-                    f"ALTER TABLE medicines ADD COLUMN `{field}` VARCHAR(100) NULL DEFAULT NULL"
+                    f"ALTER TABLE medicines ADD COLUMN `{field}` {sql_type} NULL DEFAULT NULL"
                 )
         conn.commit()
     finally:

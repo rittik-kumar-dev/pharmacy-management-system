@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from tkinter import ttk, messagebox
-from medicine import add_medicine, get_all_medicines, get_medicine_by_id, update_medicine, delete_medicine
+from medicine import add_medicine, get_all_medicines, get_medicine_by_id, update_medicine, delete_medicine, validate_rack_number
 
 # ─── Color Palette ───────────────────────────────────────────────
 BG        = "#0F1117"
@@ -92,20 +92,27 @@ class MedicineFrame(tk.Frame):
     def _build_sidebar(self, parent):
         sidebar = tk.Frame(parent, bg=PANEL, width=280)
         sidebar.pack(side="left", fill="y", padx=(12, 6), pady=8)
-        sidebar.pack_propagate(False)
+        sidebar.grid_propagate(False)
+        sidebar.columnconfigure(0, weight=1)
+        # Keep the footer at its requested height; spare space goes above it.
+        sidebar.rowconfigure(6, weight=1)
 
         title_row = tk.Frame(sidebar, bg=PANEL)
-        title_row.pack(fill="x", padx=18, pady=(8, 2))
+        title_row.grid(row=0, column=0, sticky="ew", padx=18, pady=(8, 2))
         self._form_title = tk.Label(title_row, text="Medicine Details",
                                     bg=PANEL, fg=ACCENT, font=("Segoe UI", 13, "bold"))
-        self._form_title.pack(side="left")
-        self._selected_label = tk.Label(sidebar, text="", bg=PANEL, fg=MUTED, font=FONT_SMALL)
-        self._selected_label.pack(fill="x", padx=18, pady=(0, 2))
+        title_row.columnconfigure(0, weight=1)
+        self._form_title.grid(row=0, column=0, sticky="w")
+        self._selected_label = tk.Label(title_row, text="", bg="#26333A", fg=ACCENT,
+                                        font=FONT_SMALL, padx=5, pady=2)
+        self._selected_label.grid(row=0, column=1, sticky="e", padx=(6, 0))
+        self._selected_label.grid_remove()
 
-        tk.Frame(sidebar, bg=BORDER, height=1).pack(fill="x", padx=18, pady=(0, 4))
+        tk.Frame(sidebar, bg=BORDER, height=1).grid(
+            row=2, column=0, sticky="ew", padx=18, pady=(0, 4))
 
         form = tk.Frame(sidebar, bg=PANEL)
-        form.pack(fill="x", padx=18)
+        form.grid(row=3, column=0, sticky="ew", padx=18)
         form.columnconfigure(1, weight=1)
 
         self._var_name    = labeled_entry(form, "Medicine Name",   0, compact=True)
@@ -118,34 +125,37 @@ class MedicineFrame(tk.Frame):
         tk.Label(form, text="Format: YYYY-MM-DD", bg=PANEL, fg=MUTED,
                  font=FONT_SMALL).grid(row=6, column=1, sticky="w", padx=(12, 0))
 
+        self._var_rack = labeled_entry(form, "Rack Number", 7, compact=True)
+
         btn_frame = tk.Frame(sidebar, bg=PANEL)
-        btn_frame.pack(fill="x", padx=18, pady=(8, 0))
+        btn_frame.grid(row=4, column=0, sticky="ew", padx=18, pady=(8, 0))
+        btn_frame.columnconfigure((0, 1), weight=1, uniform="medicine_buttons")
 
         self._btn_save = styled_button(btn_frame, "➕  Add", self._on_save, width=12)
-        self._btn_save.pack(fill="x", pady=(0, 3))
+        self._btn_save.grid(row=0, column=0, sticky="ew", padx=(0, 3), pady=(0, 3))
 
         self._btn_update = styled_button(btn_frame, "✏️  Update", self._on_update,
                                          color="#3B82F6", fg=TEXT, width=12)
-        self._btn_update.pack(fill="x", pady=(0, 3))
+        self._btn_update.grid(row=0, column=1, sticky="ew", padx=(3, 0), pady=(0, 3))
         self._btn_update.config(state="disabled")
 
         self._btn_delete = styled_button(btn_frame, "🗑  Delete", self._on_delete,
                                          color=DANGER, fg=TEXT, width=12)
-        self._btn_delete.pack(fill="x", pady=(0, 3))
+        self._btn_delete.grid(row=1, column=0, sticky="ew", padx=(0, 3))
         self._btn_delete.config(state="disabled")
 
         self._btn_clear = styled_button(btn_frame, "✖  Clear", self._clear_form,
                                         color=BORDER, fg=MUTED, width=12)
-        self._btn_clear.pack(fill="x")
+        self._btn_clear.grid(row=1, column=1, sticky="ew", padx=(3, 0))
         for button in (self._btn_save, self._btn_update, self._btn_delete, self._btn_clear):
-            button.config(pady=3)
+            button.config(pady=3, padx=4, width=1)
 
         self._status = tk.Label(sidebar, text="", bg=PANEL, fg=ACCENT,
                                 font=FONT_SMALL, wraplength=260, justify="left")
-        self._status.pack(fill="x", padx=18, pady=(4, 0))
+        self._status.grid(row=5, column=0, sticky="ew", padx=18, pady=(4, 0))
 
         self._stats_frame = tk.Frame(sidebar, bg=BG, bd=0)
-        self._stats_frame.pack(fill="x", padx=18, pady=(4, 6), side="bottom")
+        self._stats_frame.grid(row=7, column=0, sticky="ew", padx=18, pady=(8, 12))
         self._lbl_total   = self._stat_label("Total medicines", "—")
         self._lbl_low     = self._stat_label("Low stock (< 10)", "—")
 
@@ -197,7 +207,7 @@ class MedicineFrame(tk.Frame):
         _show_placeholder()
 
 
-        cols = ("ID", "Medicine Name", "Group/Generic", "Strength", "Stock Quantity", "Price (৳)", "Expiry Date")
+        cols = ("ID", "Medicine Name", "Group/Generic", "Strength", "Stock Quantity", "Price (৳)", "Expiry Date", "Rack No.")
         style = ttk.Style(self)
         style.theme_use("clam")
         style.configure("Pharmacy.Treeview",
@@ -217,8 +227,8 @@ class MedicineFrame(tk.Frame):
         self._tree = ttk.Treeview(frame_tree, columns=cols, show="headings",
                                   style="Pharmacy.Treeview", selectmode="browse")
 
-        col_widths = dict(zip(cols, (40, 150, 145, 80, 105, 75, 100)))
-        min_widths = dict(zip(cols, (30, 95, 95, 60, 95, 60, 90)))
+        col_widths = dict(zip(cols, (40, 150, 145, 80, 105, 75, 100, 100)))
+        min_widths = dict(zip(cols, (30, 95, 95, 60, 95, 60, 90, 90)))
         for c in cols:
             self._tree.heading(c, text=c, anchor="center")
             self._tree.column(c, width=col_widths[c], minwidth=min_widths[c],
@@ -242,6 +252,9 @@ class MedicineFrame(tk.Frame):
         frame_tree.columnconfigure(0, weight=1)
         self._tree.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
+        horizontal = ttk.Scrollbar(frame_tree, orient="horizontal", command=self._tree.xview)
+        self._tree.configure(xscrollcommand=horizontal.set)
+        horizontal.grid(row=1, column=0, sticky="ew")
 
         self._tree.bind("<<TreeviewSelect>>", self._on_row_select)
 
@@ -264,6 +277,11 @@ class MedicineFrame(tk.Frame):
             return False
         if any(len(v) > 100 for v in (name, self._var_generic.get().strip(), strength)):
             messagebox.showerror("Invalid Details", "Name, generic, and strength must each be at most 100 characters.")
+            return False
+        try:
+            validate_rack_number(self._var_rack.get())
+        except ValueError as error:
+            messagebox.showerror("Invalid Rack Number", str(error))
             return False
         try:
             amount = Decimal(price)
@@ -294,7 +312,7 @@ class MedicineFrame(tk.Frame):
             return
         try:
             add_medicine(format_name(name), Decimal(price), int(stock.lstrip("0") or "0"), expires,
-                         format_name(self._var_generic.get()), format_strength(self._var_strength.get()))
+                         format_name(self._var_generic.get()), format_strength(self._var_strength.get()), self._var_rack.get().strip())
             self._clear_form()
             self._set_status(f"✅ '{name}' added successfully.")
             self.refresh_table()
@@ -310,7 +328,7 @@ class MedicineFrame(tk.Frame):
             return
         try:
             update_medicine(self._selected_id, format_name(name), Decimal(price), int(stock.lstrip("0") or "0"), expires,
-                            format_name(self._var_generic.get()), format_strength(self._var_strength.get()))
+                            format_name(self._var_generic.get()), format_strength(self._var_strength.get()), self._var_rack.get().strip())
             updated_id = self._selected_id
             self._clear_form()
             self._set_status(f"✅ Medicine ID {updated_id} updated.")
@@ -337,6 +355,7 @@ class MedicineFrame(tk.Frame):
     def _on_row_select(self, _event):
         sel = self._tree.selection()
         if not sel:
+            self._selected_label.grid_remove()
             return
         values = self._tree.item(sel[0], "values")
         self._selected_id = int(values[0])
@@ -346,10 +365,12 @@ class MedicineFrame(tk.Frame):
         self._var_name.set(med["name"])
         self._var_generic.set(med.get("generic") or "")
         self._var_strength.set(med.get("strength") or "")
+        self._var_rack.set(med.get("rack_number") or "")
         self._var_stock.set(med["stock"])
         self._var_price.set(str(med["price"]))
         self._var_expires.set(str(med["expires_date"]) if med["expires_date"] else "")
-        self._selected_label.config(text=f"Selected ID: {self._selected_id}")
+        self._selected_label.config(text=f"ID: {self._selected_id}")
+        self._selected_label.grid()
         self._btn_update.config(state="normal")
         self._btn_delete.config(state="normal")
         self._btn_save.config(state="disabled")
@@ -381,7 +402,7 @@ class MedicineFrame(tk.Frame):
             tags = (tag, "low") if r["stock"] < 10 else (tag,)
             self._tree.insert("", "end", values=(
                 r["id"], format_name(r["name"]), format_name(r.get("generic")), format_strength(r.get("strength")),
-                r["stock"], f"{float(r['price']):.2f}", r["expires_date"] or ""
+                r["stock"], f"{float(r['price']):.2f}", r["expires_date"] or "", r.get("rack_number") or "Not assigned"
             ), tags=tags)
         count = len(rows)
         self._lbl_row_count.config(text=f"{count} medicine{'s' if count != 1 else ''} shown")
@@ -394,10 +415,11 @@ class MedicineFrame(tk.Frame):
     # ── Form utils ───────────────────────────────────────────────
     def _clear_form(self):
         for v in (self._var_name, self._var_generic, self._var_strength,
-                  self._var_price, self._var_stock, self._var_expires):
+                  self._var_price, self._var_stock, self._var_expires, self._var_rack):
             v.set("")
         self._selected_id = None
         self._selected_label.config(text="")
+        self._selected_label.grid_remove()
         self._btn_update.config(state="disabled")
         self._btn_delete.config(state="disabled")
         self._btn_save.config(state="normal")
