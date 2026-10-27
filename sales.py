@@ -23,13 +23,22 @@ class SalesFrame(tk.Frame):
         self.refresh_medicines()
 
     def _build_ui(self):
+        # Reserve the checkout controls before allocating space to the tables.
+        actions = tk.Frame(self, bg=BG)
+        actions.pack(side="bottom", fill="x", padx=12, pady=(4, 8))
+        styled_button(actions, "Remove Item", self._on_remove, color=BORDER,
+                      fg=TEXT, width=12).pack(side="left")
+        self._btn_complete = styled_button(actions, "Complete Sale", self._on_complete, width=14)
+        self._btn_complete.pack(side="right")
+        self._total_label = tk.Label(actions, text="", bg=BG, fg=ACCENT,
+                                     font=("Segoe UI", 12, "bold"))
+        self._total_label.pack(side="right", padx=14)
         tk.Label(self, text="Sales / Billing", bg=BG, fg=TEXT,
                  font=("Segoe UI", 16, "bold")).pack(anchor="w", padx=12, pady=(8, 4))
         body = tk.Frame(self, bg=BG)
-        body.pack(fill="both", expand=True, padx=12, pady=(4, 12))
+        body.pack(fill="both", expand=True, padx=12, pady=(4, 0))
         body.columnconfigure(0, weight=1)
         body.rowconfigure(1, weight=1)
-        body.rowconfigure(4, weight=1)
         search_row = tk.Frame(body, bg=BG)
         search_row.grid(row=0, column=0, sticky="ew", pady=(0, 6))
         tk.Label(search_row, text="Search Medicine", bg=BG, fg=MUTED,
@@ -64,25 +73,16 @@ class SalesFrame(tk.Frame):
                  font=("Segoe UI", 12, "bold")).grid(row=3, column=0, sticky="w", pady=(0, 4))
         self._cart_tree = self._make_table(body, 4,
             ("Medicine", "Strength", "Unit Price", "Quantity", "Subtotal"),
-            (220, 120, 110, 90, 120))
-        actions = tk.Frame(body, bg=BG)
-        actions.grid(row=5, column=0, sticky="ew", pady=(8, 0))
-        styled_button(actions, "Remove Item", self._on_remove, color=BORDER,
-                      fg=TEXT, width=12).pack(side="left")
-        self._btn_complete = styled_button(actions, "Complete Sale", self._on_complete, width=14)
-        self._btn_complete.pack(side="right")
-        self._total_label = tk.Label(actions, text="", bg=BG, fg=ACCENT,
-                                     font=("Segoe UI", 12, "bold"))
-        self._total_label.pack(side="right", padx=14)
+            (220, 120, 110, 90, 120), height=3)
         self._search_var.trace_add("write", lambda *_: self._filter_medicines())
         self._render_cart()
 
-    def _make_table(self, parent, row, columns, widths):
+    def _make_table(self, parent, row, columns, widths, height=4):
         holder = tk.Frame(parent, bg=BG)
         holder.grid(row=row, column=0, sticky="nsew")
         holder.rowconfigure(0, weight=1)
         holder.columnconfigure(0, weight=1)
-        tree = ttk.Treeview(holder, columns=columns, show="headings", height=4,
+        tree = ttk.Treeview(holder, columns=columns, show="headings", height=height,
                             style="Pharmacy.Treeview", selectmode="browse")
         for column, width in zip(columns, widths):
             tree.heading(column, text=column)

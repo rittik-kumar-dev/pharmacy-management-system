@@ -1,4 +1,4 @@
-# Run this file: one root, a full-window login, and a persistent application shell.
+
 import tkinter as tk
 
 BG = "#0F1117"
